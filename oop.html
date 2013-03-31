@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script src="oop.js"></script>
+<script>
+var E = Class({
+	protected: {
+		initialize: function(){
+			this.setName('jsyczhanghao');
+			this.setAge();	
+		}	
+	},
+	
+	static: {
+		protected: {
+			getInstance: function(){
+				return new this();
+			}	
+		}
+					
+	}
+})
+
+var A = Class({
+	extend: E,
+	
+	private: {		
+		setName: function(name){
+			this.name = name;	
+		},
+		
+		s: function(name){
+			this.setName(name);	
+		}
+	},
+	
+	protected: {
+		setAge: function(age){
+			this.age = 123;
+		}
+	},
+	
+	setMyName: function(name){
+		var t = this;
+		
+		c(function(){
+			t.s(name);
+		});	
+	}
+});
+
+function c(callback){
+	callback();	
+}
+
+var a = A.getInstance();
+
+console.log(a.name, a.age);
+a.setMyName();
+a.setAge();
+
+var b = new A();
+b.setMyName('123');
+
+console.log(a.name, b.name);
+</script>
+</head>
+
+<body>
+</body>
+</html>
+
