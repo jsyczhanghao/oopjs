@@ -15,18 +15,17 @@ var E = Class({
 	
 	static: {
 		protected: {
-			getInstance: function(){
+			_getInstance: function(){
 				return new this();
 			}	
-		}
-					
+		}	
 	}
 })
 
 var A = Class({
 	extend: E,
 	
-	private: {		
+	private: {			
 		setName: function(name){
 			this.name = name;	
 		},
@@ -48,6 +47,12 @@ var A = Class({
 		c(function(){
 			t.s(name);
 		});	
+	},
+	
+	static: {
+		getInstance: function(){
+			return A._getInstance();
+		}	
 	}
 });
 
@@ -71,4 +76,5 @@ console.log(a.name, b.name);
 <body>
 </body>
 </html>
+
 

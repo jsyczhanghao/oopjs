@@ -13,35 +13,47 @@
 		} 
 	}
 	
-	function override(name, func, type){
+	function classIdInChian(cid, pid, type){
+		if(cid && pid){
+			return cid == pid ? true : type != 'private' ? classIdInChian(classCache[cid].pid, pid, type) : false;
+		}
+		
+		return false;
+	}
+	
+	function override(name, func, classid, type){
 		return function(){
 			var status = false, caller = arguments.callee.caller;
 
-			while ( caller ) {
-				if ( caller.$classid == this.$classid ) {
+			while(caller){
+				if(classIdInChian(caller.$classid, classid, type)){
 					status = true; break;
 				}
 				
 				caller = caller.caller;
 			}
 			
-			if ( !status ) {
+			if(!status){
 				throw new Error(name + ' is ' + type + ' method!');	
 			} 
 			
-			func.apply(this, arguments);		
+			return func.apply(this, arguments);		
 		};
 	}
 	
 	function extendMethods(prototype, pros, classid, constructor, isextend){
-		if(pros.extend) {
-			var extend_prototype = pros.extend.prototype;
+		var extend;
+		
+		if(extend = pros.extend) {
+			var extend_prototype = extend.prototype;
 
-			if( extend_prototype && !extend_prototype.$classid){
+			if(extend_prototype && !extend_prototype.$classid){
 				throw new Error('extend is not a class!');	
 			}	
 	
-			extendMethods(prototype, classCache[extend_prototype.$classid], classid, constructor, isextend);
+			extendMethods(prototype, classCache[extend_prototype.$classid].pros, classid, constructor, isextend);
+			
+			classCache[classid].pid = extend_prototype.$classid;
 		}
 				
 		each(pros, function(type, pro){
@@ -55,7 +67,7 @@
 					
 				case 'protected':
 					each(pro, function(key, item){
-						method = prototype[key] = override(key, item, type);
+						method = prototype[key] = override(key, item, classid, type);
 					});
 				
 					break;
@@ -81,18 +93,19 @@
 	}
 	
 	exports.Class = function(pros){
-		var f = function(){
-			if (typeof this.initialize == 'function') this.initialize.apply(this, arguments);
+		var constructor = function(){
+			if(typeof this.initialize == 'function') this.initialize.apply(this, arguments);
 		};
 		
-		var prototype = f.prototype, classid = ++classId;
+		var prototype = constructor.prototype, classid = ++classId;
 
-		classCache[classid] = pros;
+		classCache[classid] = {pros: pros, pid: 0};
 		
-		extendMethods(prototype, pros, classid, f);	
-		
+		extendMethods(prototype, pros, classid, constructor);
+
 		prototype.$classid = classid;
 
-		return f;
+		return constructor;
 	};
 })(window);
+
